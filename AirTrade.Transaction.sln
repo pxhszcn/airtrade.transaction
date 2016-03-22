@@ -1,0 +1,68 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirTrade.Transaction", "AirTrade.Transaction\AirTrade.Transaction.vcxproj", "{A8ED2910-3ABE-45F8-8528-748CC1B52807}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Third-Party", "Third-Party", "{32088360-ABCF-4620-934F-2F5CC4EAAB64}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x3manager", "Third-Party\x3py\x3manager\x3manager.vcxproj", "{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirTrade.Framework.Core", "AirTrade.Framework.Core\AirTrade.Framework.Core.vcxproj", "{286869C4-45E6-4D69-9ACA-548C312F150E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirTrade.Transaction.Shell", "AirTrade.Transaction.Shell\AirTrade.Transaction.Shell.vcxproj", "{206B81D0-A462-40B2-9D0C-499FA660F37E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807} = {A8ED2910-3ABE-45F8-8528-748CC1B52807}
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992} = {276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}
+		{286869C4-45E6-4D69-9ACA-548C312F150E} = {286869C4-45E6-4D69-9ACA-548C312F150E}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807}.Debug|x64.ActiveCfg = Debug|x64
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807}.Debug|x64.Build.0 = Debug|x64
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807}.Debug|x86.ActiveCfg = Debug|Win32
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807}.Debug|x86.Build.0 = Debug|Win32
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807}.Release|x64.ActiveCfg = Release|x64
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807}.Release|x64.Build.0 = Release|x64
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807}.Release|x86.ActiveCfg = Release|Win32
+		{A8ED2910-3ABE-45F8-8528-748CC1B52807}.Release|x86.Build.0 = Release|Win32
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}.Debug|x64.ActiveCfg = Debug|x64
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}.Debug|x64.Build.0 = Debug|x64
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}.Debug|x86.ActiveCfg = Debug|Win32
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}.Debug|x86.Build.0 = Debug|Win32
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}.Release|x64.ActiveCfg = Release|x64
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}.Release|x64.Build.0 = Release|x64
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}.Release|x86.ActiveCfg = Release|Win32
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992}.Release|x86.Build.0 = Release|Win32
+		{286869C4-45E6-4D69-9ACA-548C312F150E}.Debug|x64.ActiveCfg = Debug|x64
+		{286869C4-45E6-4D69-9ACA-548C312F150E}.Debug|x64.Build.0 = Debug|x64
+		{286869C4-45E6-4D69-9ACA-548C312F150E}.Debug|x86.ActiveCfg = Debug|Win32
+		{286869C4-45E6-4D69-9ACA-548C312F150E}.Debug|x86.Build.0 = Debug|Win32
+		{286869C4-45E6-4D69-9ACA-548C312F150E}.Release|x64.ActiveCfg = Release|x64
+		{286869C4-45E6-4D69-9ACA-548C312F150E}.Release|x64.Build.0 = Release|x64
+		{286869C4-45E6-4D69-9ACA-548C312F150E}.Release|x86.ActiveCfg = Release|Win32
+		{286869C4-45E6-4D69-9ACA-548C312F150E}.Release|x86.Build.0 = Release|Win32
+		{206B81D0-A462-40B2-9D0C-499FA660F37E}.Debug|x64.ActiveCfg = Debug|x64
+		{206B81D0-A462-40B2-9D0C-499FA660F37E}.Debug|x64.Build.0 = Debug|x64
+		{206B81D0-A462-40B2-9D0C-499FA660F37E}.Debug|x86.ActiveCfg = Debug|Win32
+		{206B81D0-A462-40B2-9D0C-499FA660F37E}.Debug|x86.Build.0 = Debug|Win32
+		{206B81D0-A462-40B2-9D0C-499FA660F37E}.Release|x64.ActiveCfg = Release|x64
+		{206B81D0-A462-40B2-9D0C-499FA660F37E}.Release|x64.Build.0 = Release|x64
+		{206B81D0-A462-40B2-9D0C-499FA660F37E}.Release|x86.ActiveCfg = Release|Win32
+		{206B81D0-A462-40B2-9D0C-499FA660F37E}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{276C28BB-75AC-4CDA-AE1A-07F1DCFDB992} = {32088360-ABCF-4620-934F-2F5CC4EAAB64}
+	EndGlobalSection
+EndGlobal

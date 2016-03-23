@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClInclude Include="ITransaction.h" />
     <ClInclude Include="Transaction.h" />
+    <ClInclude Include="TreeView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Transaction.cpp" />

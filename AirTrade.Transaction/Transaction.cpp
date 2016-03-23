@@ -7,35 +7,38 @@
 
 Transaction::Transaction()
 {
+    m_hMainWindow = nullptr;
+    m_hStockTreeView = nullptr;
+    m_hProcess = nullptr;
+    Load();
 }
 
 Transaction::~Transaction()
 {
+    UnLoad();
 }
 
 bool Transaction::GetTreeViewStock(list<tstring>& treeViewContent)
 {
-    HWND hMainWindow, hTreeViewStock = nullptr;
-
-    hMainWindow = ::FindWindow(NULL, TEXT("网上股票交易系统5.0"));
-    if (hMainWindow != nullptr)
+    m_hMainWindow = ::FindWindow(NULL, TEXT("网上股票交易系统5.0"));
+    if (m_hMainWindow != nullptr)
     {
-        hTreeViewStock = ::FindWindowEx(hMainWindow, nullptr, TEXT("AfxMDIFrame42s"), nullptr);
-        if (hTreeViewStock != nullptr)
+        m_hStockTreeView = ::FindWindowEx(m_hMainWindow, nullptr, TEXT("AfxMDIFrame42s"), nullptr);
+        if (m_hStockTreeView != nullptr)
         {
-            hTreeViewStock = ::FindWindowEx(hTreeViewStock, nullptr, TEXT("AfxWnd42s"), nullptr);
-            if (hTreeViewStock != nullptr)
+            m_hStockTreeView = ::FindWindowEx(m_hStockTreeView, nullptr, TEXT("AfxWnd42s"), nullptr);
+            if (m_hStockTreeView != nullptr)
             {
-                hTreeViewStock = ::FindWindowEx(hTreeViewStock, nullptr, nullptr, TEXT("HexinScrollWnd"));
-                if (hTreeViewStock != nullptr)
+                m_hStockTreeView = ::FindWindowEx(m_hStockTreeView, nullptr, nullptr, TEXT("HexinScrollWnd"));
+                if (m_hStockTreeView != nullptr)
                 {
-                    hTreeViewStock = ::FindWindowEx(hTreeViewStock, nullptr, nullptr, TEXT("HexinScrollWnd2"));
-                    if (hTreeViewStock != nullptr)
+                    m_hStockTreeView = ::FindWindowEx(m_hStockTreeView, nullptr, nullptr, TEXT("HexinScrollWnd2"));
+                    if (m_hStockTreeView != nullptr)
                     {
-                        hTreeViewStock = ::FindWindowEx(hTreeViewStock, nullptr, TEXT("SysTreeView32"), nullptr);
-                        if (hTreeViewStock != nullptr)
+                        m_hStockTreeView = ::FindWindowEx(m_hStockTreeView, nullptr, TEXT("SysTreeView32"), nullptr);
+                        if (m_hStockTreeView != nullptr)
                         {
-                            GetTreeViewItem(hTreeViewStock, treeViewContent);
+                            GetTreeViewItem(m_hStockTreeView, treeViewContent);
                         }
                     }
                 }
@@ -69,12 +72,6 @@ HTREEITEM Transaction::TreeNodeGetNext(HWND hwnd, HTREEITEM hTreeItem)
 bool Transaction::GetTreeViewItem(HWND hwnd, list<tstring>& treeViewContent)
 {
     if (hwnd == nullptr) return false;
-
-    // Create a process for interacting with TDX.
-    DWORD dwProcessId;
-    ::GetWindowThreadProcessId(hwnd, &dwProcessId);
-    HANDLE hProcess = ::OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, FALSE, dwProcessId);
-    if (hProcess == nullptr) return false;
 
     // Create memory for passing data.
     LPVOID pMemory = VirtualAllocEx(hProcess, nullptr, 4096, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
@@ -120,8 +117,8 @@ bool Transaction::GetTreeViewItem(HWND hwnd, list<tstring>& treeViewContent)
         POINT point = { 0 };
         point.x = rect.left + 50;
         point.y = rect.bottom + 10;
-        ::SendMessage(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(point.x, point.y));
-        ::SendMessage(hwnd, WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(point.x, point.y));
+        //::SendMessage(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(point.x, point.y));
+        //::SendMessage(hwnd, WM_LBUTTONUP, MK_LBUTTON, MAKELPARAM(point.x, point.y));
         ::VirtualFreeEx(hProcess, pRect, 0, MEM_RELEASE);
     }
 
@@ -130,6 +127,53 @@ bool Transaction::GetTreeViewItem(HWND hwnd, list<tstring>& treeViewContent)
 
     // Terminate process.
     ::CloseHandle(hProcess);
+    return true;
+}
+
+bool Transaction::Load()
+{
+    // Get the window handle of "xiadan.exe".
+    m_hMainWindow = ::FindWindow(NULL, TEXT("网上股票交易系统5.0"));
+    if (m_hMainWindow == nullptr) return false;
+
+    // Get the window handle of controls inside the main window.
+    // Stock Tree View
+    m_hStockTreeView = ::FindWindowEx(m_hMainWindow, nullptr, TEXT("AfxMDIFrame42s"), nullptr);
+    if (m_hStockTreeView != nullptr)
+    {
+        m_hStockTreeView = ::FindWindowEx(m_hStockTreeView, nullptr, TEXT("AfxWnd42s"), nullptr);
+        if (m_hStockTreeView != nullptr)
+        {
+            m_hStockTreeView = ::FindWindowEx(m_hStockTreeView, nullptr, nullptr, TEXT("HexinScrollWnd"));
+            if (m_hStockTreeView != nullptr)
+            {
+                m_hStockTreeView = ::FindWindowEx(m_hStockTreeView, nullptr, nullptr, TEXT("HexinScrollWnd2"));
+                if (m_hStockTreeView != nullptr)
+                {
+                    m_hStockTreeView = ::FindWindowEx(m_hStockTreeView, nullptr, TEXT("SysTreeView32"), nullptr);
+                }
+            }
+        }
+    }
+    if (m_hMainWindow == nullptr) return false;
+
+    // Get the process handle of "xiadan.exe".
+    DWORD dwProcessId;
+    ::GetWindowThreadProcessId(m_hMainWindow, &dwProcessId);
+    m_hProcess = ::OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, FALSE, dwProcessId);
+    if (m_hProcess == nullptr) return false;
+
+    return true;
+}
+
+bool Transaction::UnLoad()
+{
+    if (m_hProcess != nullptr)
+    {
+        ::CloseHandle(m_hProcess);
+        m_hProcess = nullptr;
+    }
+
     return true;
 }
 

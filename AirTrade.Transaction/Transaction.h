@@ -3,6 +3,7 @@
 #include <module/classmacro.h>
 #include "ITransaction.h"
 #include <CommCtrl.h>
+#include "TreeView.h"
 
 class Transaction : public ITransaction
 {
@@ -16,12 +17,11 @@ protected:
 
 private:
     virtual bool GetTreeViewStock(list<tstring>& treeViewContent);
-    HTREEITEM TreeNodeGetNext(HWND hwnd, HTREEITEM hTreeItem);
-    bool GetTreeViewItem(HWND hwnd, list<tstring>& treeViewContent);
     bool Load();
     bool UnLoad();
 private:
-    HWND m_hMainWindow;
-    HWND m_hStockTreeView;
-    HANDLE m_hProcess;
+	HWND m_hMainWindow;
+	HWND m_hStockTreeView;
+	HANDLE m_hProcess;
+	RemoteTreeView m_stockTreeView;
 };

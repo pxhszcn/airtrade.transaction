@@ -93,7 +93,7 @@ HMODULE x3LoadLibrary(const char* filename)
     
     if (hmod)
     {
-        if (0 == strcmp("x3manager.pln", PathFindFileNameA(filename)))
+        if (0 == strcmp("x3manager.dll", PathFindFileNameA(filename)))
         {
             _manager = hmod;
         }

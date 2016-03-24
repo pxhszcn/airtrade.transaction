@@ -12,8 +12,7 @@ int main()
         ITransaction* transaction = (ITransaction*)componentService->LoadComponent("AirTrade.Transaction");
         if (transaction)
         {
-            list<tstring> newList;
-            transaction->GetTreeViewStock(newList);
+            transaction->PlaceOrder();
         }
         else
         {

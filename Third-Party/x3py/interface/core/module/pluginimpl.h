@@ -137,7 +137,7 @@ OUTAPI bool x3FreePlugin()
 #define X3_CLASS_MAXCOUNT 64
 #endif
 #ifndef X3MANAGER_PLNAME
-#define X3MANAGER_PLNAME "x3manager.pln"
+#define X3MANAGER_PLNAME "x3manager.dll"
 #endif
 
 OUTAPI bool x3InitPlugin(HMODULE hmod, HMODULE hmanager)

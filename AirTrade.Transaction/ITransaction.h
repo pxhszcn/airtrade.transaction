@@ -12,9 +12,16 @@ using namespace std;
 #define tstring string
 #endif
 
+enum PanelType
+{
+    PANEL_PUY,
+    PANEL_SELL,
+    PANEL_REVOKE,
+
+};
 class ITransaction : public x3::IObject
 {
 public:
     //X3DEFINE_IID(ITransaction);
-    virtual bool GetTreeViewStock(list<tstring>& treeViewContent) = 0;
+    virtual bool PlaceOrder() = 0;
 };

@@ -49,6 +49,7 @@ private:
 	HANDLE m_hProcess;
 	HWND m_hTreeView;
 	HTREEITEM m_hTreeItem;
+    tstring m_text;
 };
 
 class RemoteTreeView
@@ -63,6 +64,7 @@ public:
 	int GetCount();
 	RemoteTreeViewItem GetRoot();
 	bool TraverseTreeView();
+    bool ClickItem(tstring text);
 
 private:
 	HANDLE m_hProcess;

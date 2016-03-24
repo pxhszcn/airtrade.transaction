@@ -5,7 +5,7 @@
 #include <utilfunc/loadmodule.h>
 #include "swigext.h"
 
-// PLUGIN_PATH:         the internal plugin (*.pln) 's relative folder.
+// PLUGIN_PATH:         the internal plugin (*.dll) 's relative folder.
 // SELF_MODULE_NAME:    file name of the caller module which will load the internal plugins.
 // SELF_MODULE:         used to make SELF_MODULE_NAME.
 
@@ -74,7 +74,7 @@ void unloadPlugins()
 }
 
 /** \code
- *   const char* plugins[] = { "x3manager.pln", "myplugin.pln", NULL };
+ *   const char* plugins[] = { "x3manager.dll", "myplugin.dll", NULL };
  *   x3::AutoLoadPlugins autoload(plugins, "plugins");
  * \endcode
  */

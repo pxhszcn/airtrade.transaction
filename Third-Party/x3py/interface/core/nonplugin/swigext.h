@@ -12,7 +12,7 @@
 #if defined(_WIN32) && (defined(SWIGPYTHON) || defined(USE_PYTHON))
     #define SELF_EXT ".pyd"
 #elif !defined(SWIGINLINE)      // not in swig wrapper file.
-    #define SELF_EXT ".pln"
+    #define SELF_EXT ".dll"
 #elif defined(_WIN32)
     #define SELF_EXT ".dll"
 #else

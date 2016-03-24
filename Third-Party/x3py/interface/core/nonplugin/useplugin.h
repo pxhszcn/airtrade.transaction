@@ -5,7 +5,7 @@
 #include <utilfunc/loadmodule.h>
 #include "swigext.h"
 
-// PLUGIN_PATH:         the internal plugin (*.pln) 's relative folder.
+// PLUGIN_PATH:         the internal plugin (*.dll) 's relative folder.
 // PLUGIN_NAME:         the internal plugin name, no extension and path.
 // SELF_MODULE_NAME:    file name of the caller module which will load the internal plugin.
 // SELF_MODULE:         defined when the caller name hasn't PLUGIN_NAME.
@@ -26,7 +26,7 @@
 
 namespace x3 {
 
-static LoadModuleHelper loader(PLUGIN_PATH PLUGIN_NAME ".pln", 
+static LoadModuleHelper loader(PLUGIN_PATH PLUGIN_NAME ".dll", 
                                GetModuleHandleA(SELF_MODULE_NAME));
 
 #if !defined(X3_EXCLUDE_CREATEOBJECT) && !defined(CREATEOBJECTIMPL)

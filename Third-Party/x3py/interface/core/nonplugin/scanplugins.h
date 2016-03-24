@@ -20,7 +20,7 @@ static int      s_nmods = 0;
 
 static bool loadfilter(const char* filename, const char* ext)
 {
-    if (_stricmp(ext, ".pln") == 0
+    if (_stricmp(ext, ".dll") == 0
         && GetModuleHandleA(PathFindFileNameA(filename)) == NULL)
     {
         s_modules[s_nmods] = x3LoadLibrary(filename);
@@ -39,15 +39,15 @@ int loadScanPlugins(const char* folder = "plugins")
     PathAppendA(path, folder);
 
     // Load x3manager before others, so others can find it in x3InitPlugin().
-    if (!GetModuleHandleA("x3manager.pln"))
+    if (!GetModuleHandleA("x3manager.dll"))
     {
-        PathAppendA(path, "x3manager.pln");
-        loadfilter(path, ".pln");
+        PathAppendA(path, "x3manager.dll");
+        loadfilter(path, ".dll");
         PathRemoveFileSpecA(path);
     }
 
     typedef int (*LOADF)(const char*);
-    LOADF fload = (LOADF)GetProcAddress(GetModuleHandleA("x3manager.pln"), "x3LoadPlugins");
+    LOADF fload = (LOADF)GetProcAddress(GetModuleHandleA("x3manager.dll"), "x3LoadPlugins");
     int extcount = fload ? fload(folder) : 0;
     
     if (!fload) // load plugins regardless the x3manager plugin.
@@ -59,7 +59,7 @@ int loadScanPlugins(const char* folder = "plugins")
 void unloadScanPlugins()
 {
     typedef int (*UF)();
-    UF uf = (UF)GetProcAddress(GetModuleHandleA("x3manager.pln"), "x3UnloadPlugins");
+    UF uf = (UF)GetProcAddress(GetModuleHandleA("x3manager.dll"), "x3UnloadPlugins");
     if (uf) uf();
 
     while (s_nmods > 0)

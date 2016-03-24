@@ -118,7 +118,7 @@ OUTAPI HMODULE unixFindModule(const char* filename)
 
 static bool loadfilter(const char* filename, const char* ext)
 {
-    if (_stricmp(ext, ".pln") == 0
+    if (_stricmp(ext, ".dll") == 0
         && GetModuleHandleA(PathFindFileNameA(filename)) == NULL)
     {
         HMODULE hmod = x3LoadLibrary(filename);

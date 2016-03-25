@@ -20,25 +20,36 @@ Transaction::~Transaction()
 
 bool Transaction::PlaceOrder()
 {
+    // 加载买入股票界面
     m_stockTreeView.ClickItem(TEXT("资金股票"));
-    RefreshDialogs();
     m_stockTreeView.ClickItem(TEXT("买入[F1]"));
-    RefreshDialogs();
-    SimKeyDown(m_controls[CONTROL_MAIRU_DAIMA], '0');
-    SimKeyDown(m_controls[CONTROL_MAIRU_JIAGE], '1');
-    SimKeyDown(m_controls[CONTROL_MAIRU_SHULIANG], '2');
+    RefreshDialogsAndControls();
+    
+    // 填写买入信息
+    SimClearAndSend(m_controls[CONTROL_MAIRU_DAIMA], "000793");
+    SimClearAndSend(m_controls[CONTROL_MAIRU_JIAGE], "9.99");
+    SimClearAndSend(m_controls[CONTROL_MAIRU_SHULIANG], "20000");
+
+    // 执行买入操作
+    SimKeystroke(m_controls[CONTROL_MAIRU_DAIMA], 'B');
+
+    // 确认买入操作
+    ConfirmDialog(true);
+
+    // 获取提示信息
+    GetHint();
 
     return true;
 }
 
 bool Transaction::Load()
 {
-    // get the window handle of "xiadan.exe"
+    // 获取同花顺下单程序的主窗口句柄
     m_hMainWindow = ::FindWindow(NULL, TEXT("网上股票交易系统5.0"));
     if (m_hMainWindow == NULL) return false;
 
-    // get the window handle of controls inside the main window
-    // "Stock Tree View"
+    // 获取主窗口中导航栏控件的句柄
+    // 股票TreeView控件句柄
     m_hStockTreeView = ::FindWindowEx(m_hMainWindow, NULL, TEXT("AfxMDIFrame42s"), NULL);
     if (m_hStockTreeView != NULL)
     {
@@ -58,16 +69,16 @@ bool Transaction::Load()
     }
     if (m_hStockTreeView == NULL) return false;
 
-    // refresh current dialog handles
-    RefreshDialogs();
+    // 刷新功能界面句柄及其中的控件句柄
+    RefreshDialogsAndControls();
 
-    // get the process handle of "xiadan.exe"
+    // 获取同花顺下单程序的进程句柄
     DWORD dwProcessId;
     ::GetWindowThreadProcessId(m_hMainWindow, &dwProcessId);
     m_hProcess = ::OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, FALSE, dwProcessId);
     if (m_hProcess == NULL) return false;
 
-	// load the "Stock Tree View"
+	// 遍历股票TreeView控件
 	m_stockTreeView = RemoteTreeView(m_hProcess, m_hStockTreeView);
 	m_stockTreeView.TraverseTreeView();
 
@@ -85,7 +96,7 @@ bool Transaction::UnLoad()
     return true;
 }
 
-bool Transaction::RefreshDialogs()
+bool Transaction::RefreshDialogsAndControls()
 {
     HWND hDialog = NULL;
     HWND hDialogParent = ::FindWindowEx(m_hMainWindow, NULL, TEXT("AfxMDIFrame42s"), NULL);
@@ -98,13 +109,15 @@ bool Transaction::RefreshDialogs()
         
         RefreshControls(hDialog);
     }
+
+    return true;
 }
 
 bool Transaction::RefreshControls(HWND hDialog)
 {
     HWND hControl = NULL;
 
-    // Is it dialog for 买入股票?
+    // 买入股票界面
     if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("买入股票")) != NULL)
     {
         // 证券代码
@@ -122,19 +135,108 @@ bool Transaction::RefreshControls(HWND hDialog)
         return true;
     }
 
-    // is it dialog for 卖出股票?
+    // 卖出股票界面
     if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("卖出股票")) != NULL)
     {
         return true;
     }
 
-    // is it dialog for 撤单?
+    // 撤单股票界面
     if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("在委托记录上用鼠标双击或回车即可撤单")) != NULL)
     {
         return true;
     }
 
     return false;
+}
+
+bool Transaction::ConfirmDialog(bool bConfirmed)
+{
+    HWND hDialog = NULL;
+
+    // 等待窗口弹出
+    ::Sleep(500);
+
+    // 寻找窗口并执行操作
+    while (true)
+    {
+        hDialog = ::FindWindowEx(NULL, hDialog, TEXT("#32770"), NULL);
+        if (hDialog == NULL) break;
+
+        // 委托确认窗口
+        HWND hControl = ::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("委托确认"));
+        if (hControl != NULL)
+        {
+            SimKeystroke(hControl, bConfirmed ? 'Y' : 'N');
+            break;
+        }
+    }
+
+    return true;
+}
+
+bool Transaction::GetHint()
+{
+    HWND hDialog = NULL;
+    TCHAR szStaticBuf[256];
+
+    // 等待窗口弹出
+    ::Sleep(500);
+
+    // 寻找窗口并执行操作
+    while (true)
+    {
+        hDialog = ::FindWindowEx(NULL, hDialog, TEXT("#32770"), NULL);
+        if (hDialog == NULL) break;
+
+        // 提示窗口
+        HWND hControl = ::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("提示"));
+        if (hControl != NULL)
+        {
+            HWND hHintControl = ::GetWindow(hControl, GW_HWNDPREV);
+            if (hHintControl != NULL)
+            {
+                ::GetWindowText(hHintControl, szStaticBuf, 256);
+                DWORD dw = GetLastError();
+                OutputDebugString(szStaticBuf);
+            }
+            break;
+        }
+    }
+
+    return true;
+}
+
+void Transaction::SimClearAndSend(HWND hwnd, const char* pszSendChars)
+{
+    char ch;
+    int nPos = 0;
+    int nLen = strlen(pszSendChars);
+
+    // 全选Edit控件内容
+    ::PostMessage(hwnd, EM_SETSEL, 0, -1);
+
+    // 模拟键盘输入
+    while (nLen > nPos && (ch = pszSendChars[nPos]) != '\0')
+    {
+        nPos++;
+        SimSendChar(hwnd, ch);
+    }
+}
+
+void Transaction::SimSendChar(HWND hwnd, char ch)
+{
+    UINT keyRes = ::VkKeyScan(ch);
+
+    SimKeystroke(hwnd, (BYTE)(keyRes & 0xFF));
+}
+
+void Transaction::SimKeystroke(HWND hwnd, UINT key)
+{
+    SimKeyDown(hwnd, key);
+    //::Sleep(1); // 按下后延迟
+    //SimKeyUp(hwnd, key);
+    //::Sleep(5); // 弹起后延迟
 }
 
 void Transaction::SimKeyDown(HWND hwnd, UINT key)

@@ -6,14 +6,6 @@
 #include "TreeView.h"
 #include <unordered_map>
 
-enum DialogType
-{
-    DIALOG_UNKNOWN = 0,
-    DIALOG_MAIRU,
-    DIALOG_MAICHU,
-    DIALOG_CHEDAN
-};
-
 enum ControlType
 {
     CONTROL_UNKNOWN = 0,
@@ -36,8 +28,13 @@ private:
     virtual bool PlaceOrder();
     bool Load();
     bool UnLoad();
-    bool RefreshDialogs();
+    bool RefreshDialogsAndControls();
     bool RefreshControls(HWND hDialog);
+    bool ConfirmDialog(bool bConfirmed);
+    bool GetHint();
+    void SimClearAndSend(HWND hwnd, const char* pszSendChars);
+    void SimSendChar(HWND hwnd, char ch);
+    void SimKeystroke(HWND hwnd, UINT key);
     void SimKeyDown(HWND hwnd, UINT key);
     void SimKeyUp(HWND hwnd, UINT key);
     bool IsVKExtended(UINT key);

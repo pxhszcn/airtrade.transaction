@@ -12,7 +12,7 @@ int main()
         ITransaction* transaction = (ITransaction*)componentService->LoadComponent("AirTrade.Transaction");
         if (transaction)
         {
-            transaction->PlaceOrder();
+			transaction->ReqOrderInsert(NULL, 0);
         }
         else
         {

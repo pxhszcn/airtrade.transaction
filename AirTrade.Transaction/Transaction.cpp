@@ -3,6 +3,7 @@
 #include <module/plugininc.h>
 #include <module/pluginimpl.h>
 #include <module/modulemacro.h>
+#include <tchar.h>
 #include "Transaction.h"
 
 Transaction::Transaction()
@@ -18,13 +19,31 @@ Transaction::~Transaction()
     UnLoad();
 }
 
-bool Transaction::PlaceOrder()
+int Transaction::ReqOrderInsert(AirTradeFtdcInputOrderField* pInputOrder, int nRequestID)
 {
+	//尝试获取资金信息，发送Ctrl+C
+	//m_stockTreeView.ClickItem(TEXT("资金股票"));
+	//RefreshDialogsAndControls();
+	//LPARAM lparam;
+	//BYTE keybdState[256];
+	//::GetKeyboardState((LPBYTE)&keybdState);
+	//keybdState[VK_CONTROL] |= 0x80;
+	//::SetKeyboardState((LPBYTE)&keybdState);
+	//lparam = 0x00000001 | (LPARAM)(::MapVirtualKey(VK_CONTROL, 0) << 16);
+	//PostMessage(m_controls[CONTROL_CHAXUN_ZJGP_CXZJGP], WM_KEYDOWN, VK_CONTROL, lparam);
+
+	//SimKeystroke(m_controls[CONTROL_CHAXUN_ZJGP_CXZJGP], 'c');
+
+	//::GetKeyboardState((LPBYTE)&keybdState);
+	//lparam = 0xC0000001 | (LPARAM)(::MapVirtualKey(VK_CONTROL, 0) << 16);
+	//keybdState[VK_CONTROL] ^= 0x80;
+	//::SetKeyboardState((LPBYTE)&keybdState);
+
     // 加载买入股票界面
-    m_stockTreeView.ClickItem(TEXT("资金股票"));
-    m_stockTreeView.ClickItem(TEXT("买入[F1]"));
+	m_stockTreeView.ClickItem(TEXT("资金股票")); // 一定要切换到资金股票界面一次才不会出错 - - ？
+	m_stockTreeView.ClickItem(TEXT("买入[F1]"));
     RefreshDialogsAndControls();
-    
+
     // 填写买入信息
     SimClearAndSend(m_controls[CONTROL_MAIRU_DAIMA], "000793");
     SimClearAndSend(m_controls[CONTROL_MAIRU_JIAGE], "9.99");
@@ -39,7 +58,7 @@ bool Transaction::PlaceOrder()
     // 获取提示信息
     GetHint();
 
-    return true;
+    return 0;
 }
 
 bool Transaction::Load()
@@ -102,6 +121,10 @@ bool Transaction::RefreshDialogsAndControls()
     HWND hDialogParent = ::FindWindowEx(m_hMainWindow, NULL, TEXT("AfxMDIFrame42s"), NULL);
     if (hDialogParent == NULL) return false;
 
+	// 等待界面稳定
+	::Sleep(1000);
+
+	m_controls.clear();
     while (true)
     {
         hDialog = ::FindWindowEx(hDialogParent, hDialog, TEXT("#32770"), NULL);
@@ -115,37 +138,45 @@ bool Transaction::RefreshDialogsAndControls()
 
 bool Transaction::RefreshControls(HWND hDialog)
 {
-    HWND hControl = NULL;
+	HWND hControl = NULL;
 
-    // 买入股票界面
-    if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("买入股票")) != NULL)
-    {
-        // 证券代码
-        hControl = ::FindWindowEx(hDialog, NULL, TEXT("Edit"), NULL);
-        m_controls[CONTROL_MAIRU_DAIMA] = hControl;
+	// 买入股票界面
+	if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("买入股票")) != NULL)
+	{
+		// 证券代码
+		hControl = ::FindWindowEx(hDialog, NULL, TEXT("Edit"), NULL);
+		m_controls[CONTROL_MAIRU_DAIMA] = hControl;
 
-        // 买入价格
-        hControl = ::FindWindowEx(hDialog, hControl, TEXT("Edit"), NULL);
-        m_controls[CONTROL_MAIRU_JIAGE] = hControl;
+		// 买入价格
+		hControl = ::FindWindowEx(hDialog, hControl, TEXT("Edit"), NULL);
+		m_controls[CONTROL_MAIRU_JIAGE] = hControl;
 
-        // 买入数量
-        hControl = ::FindWindowEx(hDialog, hControl, TEXT("Edit"), NULL);
-        m_controls[CONTROL_MAIRU_SHULIANG] = hControl;
+		// 买入数量
+		hControl = ::FindWindowEx(hDialog, hControl, TEXT("Edit"), NULL);
+		m_controls[CONTROL_MAIRU_SHULIANG] = hControl;
 
-        return true;
-    }
+		return true;
+	}
 
-    // 卖出股票界面
-    if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("卖出股票")) != NULL)
-    {
-        return true;
-    }
+	// 卖出股票界面
+	if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("卖出股票")) != NULL)
+	{
+		return true;
+	}
 
-    // 撤单股票界面
-    if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("在委托记录上用鼠标双击或回车即可撤单")) != NULL)
-    {
-        return true;
-    }
+	// 撤单股票界面
+	if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("在委托记录上用鼠标双击或回车即可撤单")) != NULL)
+	{
+		return true;
+	}
+
+	if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("查询资金股票")) != NULL)
+	{
+		// 查询资金股票
+		hControl = ::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("查询资金股票"));
+		m_controls[CONTROL_CHAXUN_ZJGP_CXZJGP] = hControl;
+		return true;
+	}
 
     return false;
 }
@@ -154,8 +185,8 @@ bool Transaction::ConfirmDialog(bool bConfirmed)
 {
     HWND hDialog = NULL;
 
-    // 等待窗口弹出
-    ::Sleep(500);
+	// 等待窗口弹出
+	::Sleep(500);
 
     // 寻找窗口并执行操作
     while (true)
@@ -178,7 +209,7 @@ bool Transaction::ConfirmDialog(bool bConfirmed)
 bool Transaction::GetHint()
 {
     HWND hDialog = NULL;
-    TCHAR szStaticBuf[256];
+    TCHAR szStaticBuf[STATIC_CONTROL_MAX_LENGTH];
 
     // 等待窗口弹出
     ::Sleep(500);
@@ -196,9 +227,21 @@ bool Transaction::GetHint()
             HWND hHintControl = ::GetWindow(hControl, GW_HWNDPREV);
             if (hHintControl != NULL)
             {
-                ::GetWindowText(hHintControl, szStaticBuf, 256);
-                DWORD dw = GetLastError();
-                OutputDebugString(szStaticBuf);
+				// 提取提示内容
+				::SendMessage(hHintControl, WM_GETTEXT, (WPARAM)STATIC_CONTROL_MAX_LENGTH, (LPARAM)szStaticBuf); // GetWindowText不工作 - -？
+				SYSTEMTIME now = { 0 };
+				::GetLocalTime(&now);
+				TCHAR resultBuf[STATIC_CONTROL_MAX_LENGTH + 20];
+				_stprintf_s(resultBuf, TEXT("[%04d-%02d-%02d %02d:%02d:%02d] - %s"), now.wYear, now.wMonth, now.wDay, now.wHour, now.wMinute, now.wSecond, szStaticBuf);
+				m_hints.push_back(resultBuf);
+
+				// 点击确定按钮
+				HWND hOKButton = ::FindWindowEx(hDialog, NULL, TEXT("Button"), TEXT("确定"));
+				if (hOKButton != NULL)
+				{
+					::SendMessage(hOKButton, WM_LBUTTONDOWN, (WPARAM)MK_LBUTTON, (LPARAM)0);
+					::SendMessage(hOKButton, WM_LBUTTONUP, (WPARAM)MK_LBUTTON, (LPARAM)0);
+				}
             }
             break;
         }
@@ -234,9 +277,9 @@ void Transaction::SimSendChar(HWND hwnd, char ch)
 void Transaction::SimKeystroke(HWND hwnd, UINT key)
 {
     SimKeyDown(hwnd, key);
-    //::Sleep(1); // 按下后延迟
+    //::DoKeyDelay(1); // 按下后延迟
     //SimKeyUp(hwnd, key);
-    //::Sleep(5); // 弹起后延迟
+    //::DoKeyDelay(5); // 弹起后延迟
 }
 
 void Transaction::SimKeyDown(HWND hwnd, UINT key)
@@ -287,6 +330,44 @@ bool Transaction::IsVKExtended(UINT key)
     {
         return false;
     }
+}
+
+void Transaction::DoKeyDelay(int nTimeOutMS)
+{
+	if (nTimeOutMS < 0)
+	{
+		return;
+	}
+	else if (nTimeOutMS == 0)
+	{
+		::Sleep(0);
+		return;
+	}
+
+	__int64 start, current, frequence;
+	double diff;
+	DWORD dwMin;
+	DWORD dwTimeOut = (DWORD)nTimeOutMS;
+
+	// 设置适用Performance Counter定时器的最小的精度
+	dwMin = 10;
+
+	// 如果dwTimeOut >= dwMin，或者Performance Counter不能用，则使用原生的Sleep函数
+	if (dwTimeOut >= dwMin || !::QueryPerformanceCounter((LARGE_INTEGER*)&start))
+	{
+		::Sleep(dwTimeOut);
+		return;
+	}
+
+	// 获取频率
+	::QueryPerformanceFrequency((LARGE_INTEGER*)&frequence);
+
+	do
+	{
+		::Sleep(0);
+		::QueryPerformanceCounter((LARGE_INTEGER*)&current);
+		diff = ((double)(current - start) / (double)frequence) * 1000.0;
+	} while ((DWORD)diff < dwTimeOut);
 }
 
 XBEGIN_DEFINE_MODULE()

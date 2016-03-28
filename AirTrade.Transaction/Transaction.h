@@ -6,12 +6,15 @@
 #include "TreeView.h"
 #include <unordered_map>
 
+#define STATIC_CONTROL_MAX_LENGTH 512
+
 enum ControlType
 {
     CONTROL_UNKNOWN = 0,
     CONTROL_MAIRU_DAIMA,
     CONTROL_MAIRU_JIAGE,
-    CONTROL_MAIRU_SHULIANG
+    CONTROL_MAIRU_SHULIANG,
+	CONTROL_CHAXUN_ZJGP_CXZJGP,
 };
 
 class Transaction : public ITransaction
@@ -25,7 +28,7 @@ protected:
     virtual ~Transaction();
 
 private:
-    virtual bool PlaceOrder();
+	virtual int ReqOrderInsert(AirTradeFtdcInputOrderField* pInputOrder, int nRequestID);
     bool Load();
     bool UnLoad();
     bool RefreshDialogsAndControls();
@@ -38,10 +41,12 @@ private:
     void SimKeyDown(HWND hwnd, UINT key);
     void SimKeyUp(HWND hwnd, UINT key);
     bool IsVKExtended(UINT key);
+	void DoKeyDelay(int nTimeoutMS);
 private:
 	HWND m_hMainWindow;
 	HWND m_hStockTreeView;
 	HANDLE m_hProcess;
 	RemoteTreeView m_stockTreeView;
     unordered_map<ControlType, HWND> m_controls;
+	vector<tstring> m_hints;
 };

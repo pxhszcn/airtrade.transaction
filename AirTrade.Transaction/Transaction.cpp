@@ -21,36 +21,27 @@ Transaction::~Transaction()
 
 int Transaction::ReqOrderInsert(AirTradeFtdcInputOrderField* pInputOrder, int nRequestID)
 {
-	//尝试获取资金信息，发送Ctrl+C
-	//m_stockTreeView.ClickItem(TEXT("资金股票"));
-	//RefreshDialogsAndControls();
-	//LPARAM lparam;
-	//BYTE keybdState[256];
-	//::GetKeyboardState((LPBYTE)&keybdState);
-	//keybdState[VK_CONTROL] |= 0x80;
-	//::SetKeyboardState((LPBYTE)&keybdState);
-	//lparam = 0x00000001 | (LPARAM)(::MapVirtualKey(VK_CONTROL, 0) << 16);
-	//PostMessage(m_controls[CONTROL_CHAXUN_ZJGP_CXZJGP], WM_KEYDOWN, VK_CONTROL, lparam);
-
-	//SimKeystroke(m_controls[CONTROL_CHAXUN_ZJGP_CXZJGP], 'c');
-
-	//::GetKeyboardState((LPBYTE)&keybdState);
-	//lparam = 0xC0000001 | (LPARAM)(::MapVirtualKey(VK_CONTROL, 0) << 16);
-	//keybdState[VK_CONTROL] ^= 0x80;
-	//::SetKeyboardState((LPBYTE)&keybdState);
+	// 尝试获取资金信息，发送Ctrl+C
+	m_stockTreeView.ClickItem(TEXT("中签")); // 需要先切换到不常用的界面然后再点需要的界面才工作正常
+	m_stockTreeView.ClickItem(TEXT("资金股票"));
+	RefreshDialogsAndControls();
+	m_sendKeys.Send("^C", m_controls[CONTROL_CHAXUN_ZJGP]);
 
     // 加载买入股票界面
-	m_stockTreeView.ClickItem(TEXT("资金股票")); // 一定要切换到资金股票界面一次才不会出错 - - ？
+	m_stockTreeView.ClickItem(TEXT("中签")); 
 	m_stockTreeView.ClickItem(TEXT("买入[F1]"));
     RefreshDialogsAndControls();
 
     // 填写买入信息
-    SimClearAndSend(m_controls[CONTROL_MAIRU_DAIMA], "000793");
-    SimClearAndSend(m_controls[CONTROL_MAIRU_JIAGE], "9.99");
-    SimClearAndSend(m_controls[CONTROL_MAIRU_SHULIANG], "20000");
+	::PostMessage(m_controls[CONTROL_MAIRU_DAIMA], EM_SETSEL, 0, -1);
+	m_sendKeys.Send("000793", m_controls[CONTROL_MAIRU_DAIMA]);
+	::PostMessage(m_controls[CONTROL_MAIRU_JIAGE], EM_SETSEL, 0, -1);
+	m_sendKeys.Send("9.99", m_controls[CONTROL_MAIRU_JIAGE]);
+	::PostMessage(m_controls[CONTROL_MAIRU_SHULIANG], EM_SETSEL, 0, -1);
+	m_sendKeys.Send("20000", m_controls[CONTROL_MAIRU_SHULIANG]);
 
     // 执行买入操作
-    SimKeystroke(m_controls[CONTROL_MAIRU_DAIMA], 'B');
+	m_sendKeys.Send("B", m_controls[CONTROL_MAIRU_DAIMA]);
 
     // 确认买入操作
     ConfirmDialog(true);
@@ -59,6 +50,16 @@ int Transaction::ReqOrderInsert(AirTradeFtdcInputOrderField* pInputOrder, int nR
     GetHint();
 
     return 0;
+}
+
+int Transaction::ReqQryInvestorPosition(AirTradeFtdcQryInvestorPositionField* pQryUserInvestorPosition, int nRequestID)
+{
+	return 0;
+}
+
+int Transaction::ReqQryInvestorAccount(AirTradeFtdcQryInvestorAccountField* pQryInvestorAccount, int nRequestID)
+{
+	return 0;
 }
 
 bool Transaction::Load()
@@ -170,11 +171,19 @@ bool Transaction::RefreshControls(HWND hDialog)
 		return true;
 	}
 
+	// 查询资金股票界面
 	if (::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("查询资金股票")) != NULL)
 	{
-		// 查询资金股票
-		hControl = ::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("查询资金股票"));
-		m_controls[CONTROL_CHAXUN_ZJGP_CXZJGP] = hControl;
+		hControl = ::FindWindowEx(hDialog, NULL, NULL, TEXT("HexinScrollWnd"));
+		if (hControl != NULL)
+		{
+			hControl = ::FindWindowEx(hControl, NULL, NULL, TEXT("HexinScrollWnd2"));
+			if (hControl != NULL)
+			{
+				hControl = ::FindWindowEx(hControl, NULL, TEXT("CVirtualGridCtrl"), TEXT("Custom1"));
+				m_controls[CONTROL_CHAXUN_ZJGP] = hControl;
+			}
+		}
 		return true;
 	}
 
@@ -198,7 +207,7 @@ bool Transaction::ConfirmDialog(bool bConfirmed)
         HWND hControl = ::FindWindowEx(hDialog, NULL, TEXT("Static"), TEXT("委托确认"));
         if (hControl != NULL)
         {
-            SimKeystroke(hControl, bConfirmed ? 'Y' : 'N');
+			m_sendKeys.Send(bConfirmed ? "Y": "N", hControl);
             break;
         }
     }
@@ -234,6 +243,7 @@ bool Transaction::GetHint()
 				TCHAR resultBuf[STATIC_CONTROL_MAX_LENGTH + 20];
 				_stprintf_s(resultBuf, TEXT("[%04d-%02d-%02d %02d:%02d:%02d] - %s"), now.wYear, now.wMonth, now.wDay, now.wHour, now.wMinute, now.wSecond, szStaticBuf);
 				m_hints.push_back(resultBuf);
+				OutputDebugString(resultBuf);
 
 				// 点击确定按钮
 				HWND hOKButton = ::FindWindowEx(hDialog, NULL, TEXT("Button"), TEXT("确定"));
@@ -248,126 +258,6 @@ bool Transaction::GetHint()
     }
 
     return true;
-}
-
-void Transaction::SimClearAndSend(HWND hwnd, const char* pszSendChars)
-{
-    char ch;
-    int nPos = 0;
-    int nLen = strlen(pszSendChars);
-
-    // 全选Edit控件内容
-    ::PostMessage(hwnd, EM_SETSEL, 0, -1);
-
-    // 模拟键盘输入
-    while (nLen > nPos && (ch = pszSendChars[nPos]) != '\0')
-    {
-        nPos++;
-        SimSendChar(hwnd, ch);
-    }
-}
-
-void Transaction::SimSendChar(HWND hwnd, char ch)
-{
-    UINT keyRes = ::VkKeyScan(ch);
-
-    SimKeystroke(hwnd, (BYTE)(keyRes & 0xFF));
-}
-
-void Transaction::SimKeystroke(HWND hwnd, UINT key)
-{
-    SimKeyDown(hwnd, key);
-    //::DoKeyDelay(1); // 按下后延迟
-    //SimKeyUp(hwnd, key);
-    //::DoKeyDelay(5); // 弹起后延迟
-}
-
-void Transaction::SimKeyDown(HWND hwnd, UINT key)
-{
-    UINT scanCode;
-    LPARAM lParam;
-
-    scanCode = ::MapVirtualKey(key, 0);
-
-    lParam = 0x00000001 | (LPARAM)(scanCode << 16);
-    if (IsVKExtended(key))
-    {
-        lParam = lParam | 0x01000000;
-    }
-    ::PostMessage(hwnd, WM_KEYDOWN, (WPARAM)key, lParam);
-}
-
-void Transaction::SimKeyUp(HWND hwnd, UINT key)
-{
-    UINT scanCode;
-    LPARAM lParam;
-
-    scanCode = ::MapVirtualKey(key, 0);
-
-    lParam = 0x00000001 | (LPARAM)(scanCode << 16);
-    if (IsVKExtended(key))
-    {
-        lParam = lParam | 0x01000000;
-    }
-    ::PostMessage(hwnd, WM_KEYUP, (WPARAM)key, lParam);
-}
-
-bool Transaction::IsVKExtended(UINT key)
-{
-    if (key == VK_INSERT || key == VK_DELETE || key == VK_END || key == VK_DOWN ||
-        key == VK_NEXT || key == VK_LEFT || key == VK_RIGHT || key == VK_HOME || key == VK_UP ||
-        key == VK_PRIOR || key == VK_DIVIDE || key == VK_APPS || key == VK_LWIN || key == VK_RWIN ||
-        key == VK_RMENU || key == VK_RCONTROL || key == VK_SLEEP || key == VK_BROWSER_BACK ||
-        key == VK_BROWSER_FORWARD || key == VK_BROWSER_REFRESH || key == VK_BROWSER_STOP ||
-        key == VK_BROWSER_SEARCH || key == VK_BROWSER_FAVORITES || key == VK_BROWSER_HOME ||
-        key == VK_VOLUME_MUTE || key == VK_VOLUME_DOWN || key == VK_VOLUME_UP || key == VK_MEDIA_NEXT_TRACK ||
-        key == VK_MEDIA_PREV_TRACK || key == VK_MEDIA_STOP || key == VK_MEDIA_PLAY_PAUSE ||
-        key == VK_LAUNCH_MAIL || key == VK_LAUNCH_MEDIA_SELECT || key == VK_LAUNCH_APP1 || key == VK_LAUNCH_APP2)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void Transaction::DoKeyDelay(int nTimeOutMS)
-{
-	if (nTimeOutMS < 0)
-	{
-		return;
-	}
-	else if (nTimeOutMS == 0)
-	{
-		::Sleep(0);
-		return;
-	}
-
-	__int64 start, current, frequence;
-	double diff;
-	DWORD dwMin;
-	DWORD dwTimeOut = (DWORD)nTimeOutMS;
-
-	// 设置适用Performance Counter定时器的最小的精度
-	dwMin = 10;
-
-	// 如果dwTimeOut >= dwMin，或者Performance Counter不能用，则使用原生的Sleep函数
-	if (dwTimeOut >= dwMin || !::QueryPerformanceCounter((LARGE_INTEGER*)&start))
-	{
-		::Sleep(dwTimeOut);
-		return;
-	}
-
-	// 获取频率
-	::QueryPerformanceFrequency((LARGE_INTEGER*)&frequence);
-
-	do
-	{
-		::Sleep(0);
-		::QueryPerformanceCounter((LARGE_INTEGER*)&current);
-		diff = ((double)(current - start) / (double)frequence) * 1000.0;
-	} while ((DWORD)diff < dwTimeOut);
 }
 
 XBEGIN_DEFINE_MODULE()

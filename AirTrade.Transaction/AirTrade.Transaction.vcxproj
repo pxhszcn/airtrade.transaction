@@ -155,10 +155,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ITransaction.h" />
+    <ClInclude Include="sendkeys.h" />
     <ClInclude Include="Transaction.h" />
     <ClInclude Include="TreeView.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="sendkeys.cpp" />
     <ClCompile Include="Transaction.cpp" />
     <ClCompile Include="TreeView.cpp" />
   </ItemGroup>

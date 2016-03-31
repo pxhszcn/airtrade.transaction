@@ -24,12 +24,18 @@
     <ClInclude Include="TreeView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sendkeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Transaction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TreeView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sendkeys.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
